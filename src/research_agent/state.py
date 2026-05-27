@@ -4,6 +4,7 @@ from operator import add
 from typing import Annotated, TypedDict
 
 from research_agent.schemas import (
+    AudienceProfile,
     IntentSpec,
     ReportSection,
     ResearchFinding,
@@ -19,6 +20,7 @@ class GraphState(TypedDict, total=False):
     depth: str
 
     intent: IntentSpec
+    audience: AudienceProfile | None
     plan: ResearchPlan
 
     findings: Annotated[list[ResearchFinding], add]

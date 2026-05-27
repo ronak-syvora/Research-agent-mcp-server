@@ -24,14 +24,18 @@ def tool_definitions() -> list[Tool]:
         Tool(
             name=TOOL_RESEARCH_INTEGRATION,
             description=(
-                "Generate a comprehensive integration research report. Given a natural-language "
-                "request describing what the developer wants to integrate (e.g. 'add EigenLayer "
-                "AVS to my Foundry staking protocol'), this tool researches official docs, web "
-                "sources, GitHub examples, and optionally the user's local codebase, then "
-                "synthesizes a markdown report covering compatibility, dependencies, "
-                "architecture changes, integration plan, code examples, security review, "
-                "testing plan, deployment checklist, and references. Returns the full markdown "
-                "and writes a copy to ./reports/<slug>-<timestamp>.md. Expect 60-180s runtime."
+                "Generate a comprehensive integration research report tailored to the requester's "
+                "role and skill level. The agent automatically detects from the query whether the "
+                "user is a developer (beginner/intermediate/advanced), HR professional, Sales team "
+                "member, DevOps engineer, QA engineer, or general user — and produces a "
+                "role-appropriate report with relevant sections and language. "
+                "Examples: an HR person asking about Keka integration gets a plain-English guide "
+                "with business value, process impact, and stakeholder contacts; a junior dev asking "
+                "about EigenLayer gets prerequisites, step-by-step plan, code examples, and a "
+                "troubleshooting guide; a DevOps engineer gets infrastructure requirements, "
+                "pipeline changes, and a rollback plan. "
+                "Researches official docs, web sources, and GitHub examples. Returns the full "
+                "markdown and writes a copy to ./reports/<slug>-<timestamp>.md. Expect 60-180s runtime."
             ),
             inputSchema={
                 "type": "object",

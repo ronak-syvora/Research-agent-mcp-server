@@ -20,13 +20,15 @@ async def intent_parser(state: GraphState) -> dict:
             temperature=0.1,
         )
         log.info(
-            "intent_parser ok: target=%s source_stack=%s frameworks=%s",
+            "intent_parser ok: target=%s source_stack=%s frameworks=%s role=%s skill=%s",
             intent.target, intent.source_stack, intent.frameworks,
+            intent.audience.role, intent.audience.skill_level,
         )
-        return {"intent": intent}
+        return {"intent": intent, "audience": intent.audience}
     except Exception as exc:
         log.exception("intent_parser failed; using fallback intent")
         return {
             "intent": IntentSpec(target=query, source_stack="", frameworks=[]),
+            "audience": None,
             "errors": [f"intent_parser: {exc}"],
         }

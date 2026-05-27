@@ -8,12 +8,11 @@ from pydantic import BaseModel, Field
 from research_agent.llm import mistral_client
 from research_agent.logging_setup import get_logger
 from research_agent.prompts import (
-    GROUP_A_SECTIONS,
-    GROUP_B_SECTIONS,
-    GROUP_C_SECTIONS,
+    ROLE_SECTION_GROUPS,
     SECTION_GUIDELINES,
     SECTION_TITLES,
-    SYNTHESIZER_SYSTEM,
+    build_synthesizer_system,
+    get_role_key,
 )
 from research_agent.schemas import ReportSection, ResearchFinding, RetrievedChunk
 from research_agent.state import GraphState
@@ -112,6 +111,7 @@ async def _generate_group(
     intent_block: str,
     scan_block: str,
     findings_block: str,
+    system_prompt: str,
 ) -> list[ReportSection]:
     user = "\n\n".join(
         [
@@ -128,7 +128,7 @@ async def _generate_group(
 
     try:
         result = await mistral_client.complete_json(
-            system=SYNTHESIZER_SYSTEM,
+            system=system_prompt,
             user=user,
             schema=_SynthesizerOutput,
             temperature=0.3,
@@ -142,7 +142,7 @@ async def _generate_group(
         return [
             ReportSection(
                 id=sid,
-                title=SECTION_TITLES[sid],
+                title=SECTION_TITLES.get(sid, sid.replace("_", " ").title()),
                 body_markdown=f"_Section generation failed: {exc}_",
             )
             for sid in section_ids
@@ -153,6 +153,17 @@ async def synthesizer(state: GraphState) -> dict:
     intent = state["intent"]
     findings = list(state.get("findings", []))
     retrieved = list(state.get("retrieved", []))
+
+    audience = state.get("audience")
+    if audience is not None:
+        role_key = get_role_key(audience.role, audience.skill_level)
+        tone = audience.tone
+    else:
+        role_key = "developer_intermediate"
+        tone = "technical"
+    system_prompt = build_synthesizer_system(tone)
+    group_a, group_b, group_c = ROLE_SECTION_GROUPS[role_key]
+    log.info("synthesizer: role_key=%s tone=%s", role_key, tone)
 
     intent_block = (
         f"<intent>\n{intent.model_dump_json(indent=2)}\n</intent>"
@@ -191,9 +202,9 @@ async def synthesizer(state: GraphState) -> dict:
     )
 
     group_results = await asyncio.gather(
-        _generate_group("A", GROUP_A_SECTIONS, intent_block, scan_block, findings_block),
-        _generate_group("B", GROUP_B_SECTIONS, intent_block, scan_block, findings_block),
-        _generate_group("C", GROUP_C_SECTIONS, intent_block, scan_block, findings_block),
+        _generate_group("A", group_a, intent_block, scan_block, findings_block, system_prompt),
+        _generate_group("B", group_b, intent_block, scan_block, findings_block, system_prompt),
+        _generate_group("C", group_c, intent_block, scan_block, findings_block, system_prompt),
     )
 
     sections: dict[str, ReportSection] = {}

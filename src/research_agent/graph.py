@@ -66,6 +66,7 @@ async def run_graph(query: str, *, codebase_path: str | None = None,
         "depth": depth,
         "findings": [],
         "errors": [],
+        "audience": None,
     }
     final: GraphState = await graph.ainvoke(initial)
     return final

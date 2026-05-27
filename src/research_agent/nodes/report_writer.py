@@ -7,8 +7,8 @@ import anyio
 
 from research_agent.config import get_settings
 from research_agent.logging_setup import get_logger
-from research_agent.prompts import CANONICAL_SECTION_ORDER, SECTION_TITLES
-from research_agent.schemas import ResearchFinding
+from research_agent.prompts import CANONICAL_SECTION_ORDER, ROLE_CANONICAL_ORDER, SECTION_TITLES, get_role_key
+from research_agent.schemas import AudienceRole, ResearchFinding
 from research_agent.state import GraphState
 from research_agent.utils.markdown import make_slug, timestamp_suffix
 
@@ -58,15 +58,28 @@ async def report_writer(state: GraphState) -> dict:
     slug = make_slug(title)
     filename = f"{slug}-{timestamp_suffix(now)}.md"
 
+    audience = state.get("audience")
+    if audience is not None:
+        role_key = get_role_key(audience.role, audience.skill_level)
+        section_order = ROLE_CANONICAL_ORDER[role_key]
+        if audience.role == AudienceRole.developer:
+            role_label = f"Developer Report ({audience.skill_level.value.title()})"
+        else:
+            role_label = f"{audience.role.value.upper()} Report"
+    else:
+        section_order = CANONICAL_SECTION_ORDER
+        role_label = "Integration Report"
+
     body_parts: list[str] = [
         f"# {title}\n",
+        f"> **Report type:** {role_label}  ",
         f"> Generated {now.strftime('%Y-%m-%d %H:%M UTC')} by research-agent.  ",
         f"> Original query: _{query}_\n",
     ]
 
-    for sid in CANONICAL_SECTION_ORDER:
+    for sid in section_order:
         sec = sections.get(sid)
-        title_line = f"## {SECTION_TITLES[sid]}"
+        title_line = f"## {SECTION_TITLES.get(sid, sid.replace('_', ' ').title())}"
         if sec is None or not sec.body_markdown.strip():
             body_parts.append(f"{title_line}\n\n_Section not generated._\n")
             continue

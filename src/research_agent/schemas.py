@@ -1,9 +1,32 @@
 from datetime import datetime
+from enum import Enum
 from typing import Literal
 
 from pydantic import BaseModel, Field
 
 SourceType = Literal["web", "docs", "github", "codebase"]
+
+
+class AudienceRole(str, Enum):
+    developer = "developer"
+    hr = "hr"
+    sales = "sales"
+    devops = "devops"
+    qa = "qa"
+    general = "general"
+
+
+class SkillLevel(str, Enum):
+    beginner = "beginner"
+    intermediate = "intermediate"
+    advanced = "advanced"
+    na = "na"
+
+
+class AudienceProfile(BaseModel):
+    role: AudienceRole = AudienceRole.developer
+    skill_level: SkillLevel = SkillLevel.intermediate
+    tone: Literal["technical", "plain"] = "technical"
 
 
 class IntentSpec(BaseModel):
@@ -13,6 +36,7 @@ class IntentSpec(BaseModel):
     domain: str = Field(default="", description="High-level domain (DeFi, auth, billing, ...)")
     task_type: Literal["integration", "migration", "evaluation"] = "integration"
     constraints: list[str] = Field(default_factory=list)
+    audience: AudienceProfile = Field(default_factory=AudienceProfile)
 
 
 class ResearchPlan(BaseModel):
