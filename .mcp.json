@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "research-agent": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/Users/ronakkadam/Work/research-agent-mcp-server",
+        "run",
+        "research-agent-mcp"
+      ],
+      "env": {
+        "MISTRAL_API_KEY": "${MISTRAL_API_KEY}",
+        "TAVILY_API_KEY": "${TAVILY_API_KEY}",
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}",
+        "RESEARCH_AGENT_LOG_LEVEL": "INFO"
+      }
+    }
+  }
+}
