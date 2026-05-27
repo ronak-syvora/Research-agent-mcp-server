@@ -35,7 +35,8 @@ def tool_definitions() -> list[Tool]:
                 "troubleshooting guide; a DevOps engineer gets infrastructure requirements, "
                 "pipeline changes, and a rollback plan. "
                 "Researches official docs, web sources, and GitHub examples. Returns the full "
-                "markdown and writes a copy to ./reports/<slug>-<timestamp>.md. Expect 60-180s runtime."
+                "markdown and writes a copy to <reports_dir>/<slug>-<timestamp>.md "
+                "(default ~/.research-agent/reports). Expect 60-180s runtime."
             ),
             inputSchema={
                 "type": "object",
@@ -94,7 +95,7 @@ def tool_definitions() -> list[Tool]:
         Tool(
             name=TOOL_LIST_REPORTS,
             description=(
-                "List previously generated research reports in ./reports/ with title, slug, "
+                "List previously generated research reports in the reports dir with title, slug, "
                 "and timestamp. Useful for referencing prior runs in conversation."
             ),
             inputSchema={"type": "object", "properties": {}},

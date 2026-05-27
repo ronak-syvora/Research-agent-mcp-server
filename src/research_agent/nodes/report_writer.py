@@ -95,13 +95,19 @@ async def report_writer(state: GraphState) -> dict:
 
     settings = get_settings()
     reports_dir = Path(settings.reports_dir).resolve()
-    reports_dir.mkdir(parents=True, exist_ok=True)
     out_path = reports_dir / filename
 
     def _write() -> None:
+        reports_dir.mkdir(parents=True, exist_ok=True)
         out_path.write_text(markdown, encoding="utf-8")
 
-    await anyio.to_thread.run_sync(_write)
-    log.info("report_writer: wrote %s (%d bytes)", out_path, len(markdown))
+    try:
+        await anyio.to_thread.run_sync(_write)
+    except OSError as e:
+        # A read-only or otherwise unwritable target must not crash the tool:
+        # the full report is still returned inline to the client.
+        log.warning("report_writer: could not save report to %s: %s", out_path, e)
+        return {"report_markdown": markdown, "report_path": ""}
 
+    log.info("report_writer: wrote %s (%d bytes)", out_path, len(markdown))
     return {"report_markdown": markdown, "report_path": str(out_path)}
