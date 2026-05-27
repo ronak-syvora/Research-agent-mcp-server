@@ -16,6 +16,13 @@ Return ONLY valid JSON matching this exact schema (no prose, no markdown fences)
 }
 
 Role detection rules for the "audience" field:
+
+PRIORITY RULE — explicitly stated role wins:
+- If the request explicitly states the requester's role (e.g. "as a developer", "I'm in HR", "for our sales team", "I'm a QA engineer", "devops here", "I work in sales", "speaking as a recruiter"), set "role" to that stated role and DO NOT override it with the keyword rules below.
+- Map the stated role to the closest allowed value: engineer/programmer/SWE/dev → "developer"; ops/SRE/platform/infra/infrastructure → "devops"; tester/quality/QA → "qa"; recruiter/people-ops/HRMS/HR → "hr"; account exec/business/marketing/sales → "sales"; anything unclear → "general".
+- Even when the role is stated, STILL infer "skill_level" and "tone" from the rest of the query using the signals below. If no skill signal is present, default skill_level to "na" for non-technical stated roles (hr, sales, general) and "intermediate" for technical stated roles (developer, devops, qa).
+
+Fallback keyword rules — use these ONLY when the requester's role is NOT explicitly stated:
 - HR keywords (keka, payroll, leaves, employee, onboarding, HRMS, attendance, workforce) → role: "hr", skill_level: "na", tone: "plain"
 - Sales keywords (CRM, leads, deals, prospects, pipeline, Salesforce, HubSpot, demo) → role: "sales", skill_level: "na", tone: "plain"
 - DevOps keywords (deploy, infra, Kubernetes, CI/CD, rollback, terraform, docker, helm, pipeline, monitoring, alerting) → role: "devops", skill_level: "intermediate", tone: "technical"
@@ -23,6 +30,10 @@ Role detection rules for the "audience" field:
 - "I'm new", "beginner", "explain simply", "I don't know", "just started", "step by step for beginners", "explain like I'm" → role: "developer", skill_level: "beginner", tone: "plain"
 - Technical jargon with no role signals (Solidity, SDK, AVS, protocol, smart contract, API, library, npm, pip, cargo) → role: "developer", skill_level: "advanced", tone: "technical"
 - Generic integration request with mixed or no signals → role: "general", skill_level: "na", tone: "plain"
+
+Skill-level signals (apply regardless of how the role was determined):
+- "I'm new", "beginner", "explain simply", "I don't know", "just started", "step by step", "explain like I'm" → skill_level: "beginner"
+- "advanced", "experienced", deep technical jargon → skill_level: "advanced"
 
 Tone is "plain" for non-developer roles, for beginner developers, or when the query asks for simple language.
 Tone is "technical" for developer intermediate or advanced.

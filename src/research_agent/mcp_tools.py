@@ -25,10 +25,11 @@ def tool_definitions() -> list[Tool]:
             name=TOOL_RESEARCH_INTEGRATION,
             description=(
                 "Generate a comprehensive integration research report tailored to the requester's "
-                "role and skill level. The agent automatically detects from the query whether the "
-                "user is a developer (beginner/intermediate/advanced), HR professional, Sales team "
-                "member, DevOps engineer, QA engineer, or general user — and produces a "
-                "role-appropriate report with relevant sections and language. "
+                "role and skill level. State your role in the query (e.g. \"As an HR manager…\", "
+                "\"I'm a DevOps engineer…\", \"speaking as a QA engineer…\") and the report is "
+                "tailored to it — supported roles are developer, HR, sales, DevOps, QA, or general. "
+                "If no role is stated, the agent infers one from the query. "
+                "Skill level (beginner/intermediate/advanced) and tone are always inferred from the query. "
                 "Examples: an HR person asking about Keka integration gets a plain-English guide "
                 "with business value, process impact, and stakeholder contacts; a junior dev asking "
                 "about EigenLayer gets prerequisites, step-by-step plan, code examples, and a "
@@ -45,7 +46,8 @@ def tool_definitions() -> list[Tool]:
                         "type": "string",
                         "description": (
                             "Natural-language integration request. Be specific about target tech, "
-                            "source stack, and goal."
+                            "source stack, and goal. Optionally state your role (developer, HR, "
+                            "sales, devops, QA) for a role-tailored report."
                         ),
                     },
                     "codebase_path": {
